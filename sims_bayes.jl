@@ -46,6 +46,10 @@ end
 @everywhere function analyze(n=100;chains=2, iters=12000, burn=2000, thin=1)
   y,Xi,X2i,Zi,Xinti,Xint15i,y1,y15 = dgm(n);
   X =  hcat(Xi, X2i, Zi, Zi .* Zi, Xi .* Zi, X2i .* Zi);
+    # note: it is generally a good idea to sample from the baseline covariates (Z) a sample large enough to 
+    #  mimimize simulation error when simulating in Bayesian g-computation.
+    #  Because this is a time fixed problem and the estimand is a function of 
+    #  model predictions under static regimes, this is not a concern in this simulation
   Xint =  [hcat(Xinti, Xinti, Zi, Zi .* Zi, Xinti .* Zi, Xinti .* Zi), 
            hcat(Xint15i, Xint15i, Zi, Zi .* Zi, Xint15i .* Zi, Xint15i .* Zi)];
   res = [gibbsint(y,X,Xint,[1,2,3,9], iters, burn, thin=thin, mcbirthweight = 0., scbirthweight = 1., chain=g, _mu0 = 0., _mu1 = 10.) for g in 1:chains];

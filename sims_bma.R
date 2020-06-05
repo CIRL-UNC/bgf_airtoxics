@@ -66,6 +66,10 @@ jagsmod = "
             b[12]*x2[i]*z1[i]+ b[13]*x2[i]*z2[i]+ b[14]*x2[i]*z3[i] + 
             0
             )
+    # note: it is generally a good idea to sample from the baseline covariates (Z) a sample large enough to 
+    #  mimimize simulation error when simulating in Bayesian g-computation.
+    #  Because this is a time fixed problem and the estimand is a function of 
+    #  model predictions under static regimes, this is not a concern in this simulation
        muint1[i] <- (b0 + b[1]*xint1[i] + b[2]*xint1[i] + 
             b[3]*z1[i]+ b[4]*z2[i]+ b[5]*z3[i] +
             b[6]*z1[i]*z1[i]+ b[7]*z2[i]*z2[i]+ b[8]*z3[i]*z3[i] + 
@@ -81,7 +85,7 @@ jagsmod = "
             0
             )
        mdi[i] <- muint1[i] - muint0[i]
-       y[i] ~ dnorm(mu[i], sigma)
+       y[i] ~ dnorm(mu[i], sqrt(sigsq))
     }
     # effect measures
     md <- mean(mdi)
@@ -89,25 +93,25 @@ jagsmod = "
     m0 <- mean(muint0)
 
     # prior model variance
-    sigma ~ dt(0, 1, 1) T(0,) # half cauchy prior 
+    sigsq ~ dt(0, 1, 1) T(0,) # half cauchy prior 
     # prior probability of exclusion
     pi[1] ~ dbeta(1,1) 
     pi[2] ~ dbeta(9,1) #prior probability of exclusion
     # prior mean of beta coefficient priors
     for(k in 1:2){
       mub[k] ~ dnorm(0,1)
-      taub[k] ~ dt(0, 1, 1)  T(0,) # half cauchy prior 
+      tausq[k] ~ dt(0, 1, 1)  T(0,) # half cauchy prior 
     }
     # beta coefficient priors (spike and slab)- should generalize to less severe shrinkage (eg stochastic search variable selection)
     b0 ~ dnorm(0, 10)
     for(j in 1:2){ 
       delta[j] ~ dbern(pi[1])
-      bpr[j] ~ dnorm(mub[1], taub[1])
+      bpr[j] ~ dnorm(mub[1], sqrt(tausq[1]))
       b[j] <- bpr[j]*(1-delta[j]) 
     }
     for(j in 3:14){
       delta[j] ~ dbern(pi[2])
-      bpr[j] ~ dnorm(mub[2], taub[2])
+      bpr[j] ~ dnorm(mub[2], sqrt(tausq[2]))
       b[j] <- bpr[j]*(1-delta[j])
     }
   }
