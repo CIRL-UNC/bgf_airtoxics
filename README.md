@@ -1,5 +1,7 @@
 R, Julia, and JAGS code to accompany the paper "Bayesian G-Computation to Estimate Impacts of Interventions on Exposure Mixtures: Demonstration with Metals from Coal-fired Power Plants and Birthweight"
 
+NOTE: these programs specifically do not sample from the baseline distribution of covariates (e.g. via bootstrapping, bayesian boostrap, or parametric modeling). This is a large sample approximation (which seems wise in this example), and results may vary at small sample sizes (in simulations this effect is typically negligible).
+
 
 File manifest:
 
